@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('student_id')->constrained('users')->onDelete('cascade');
             $table->integer('total_score');
+             $table->float('grand_mean');
             $table->string('conclusion');
             $table->timestamps();
         });

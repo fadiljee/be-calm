@@ -17,6 +17,7 @@ use Laravel\Sanctum\HasApiTokens;
     'password', 
     'role', 
     'nisn', 
+    'kelas',
     'parent_id',
     'phone',          // Untuk nomor WhatsApp Guru BK
     'specialization', // Untuk bidang keahlian Guru BK

@@ -13,27 +13,32 @@ class ScreeningController extends Controller
 
    public function submit(Request $request)
 {
-    // 1. Validasi bahwa ada list jawaban
     $request->validate([
         'answers' => 'required|array',
         'answers.*.value' => 'required|integer',
     ]);
 
-    // 2. Hitung total skor dari array answers
-    $totalScore = collect($request->answers)->sum('value');
+    $answers = collect($request->answers);
+    $totalScore = $answers->sum('value');
+    $jumlahButir = $answers->count();
+    
+    // 1. Hitung Grand Mean
+    $grandMean = $totalScore / $jumlahButir;
 
-    // 3. Tentukan Kesimpulan (Sesuai logika kamu)
-    $conclusion = 'Normal';
-    if ($totalScore > 20) {
-        $conclusion = 'Butuh Konseling';
-    } elseif ($totalScore > 10) {
-        $conclusion = 'Rentan';
+    // 2. Logika Kesimpulan (Interval sesuai rumus kamu)
+    if ($grandMean >= 2.5) {
+        $conclusion = 'Baik';
+    } elseif ($grandMean >= 1.5) {
+        $conclusion = 'Sedang';
+    } else {
+        $conclusion = 'Risiko Tinggi';
     }
 
-    // 4. Simpan ke Database
+    // 3. Simpan ke Database (Termasuk grand_mean)
     $history = ScreeningHistory::create([
-        'student_id' => $request->user()->id,
+        'student_id'  => $request->user()->id,
         'total_score' => $totalScore,
+        'grand_mean'  => $grandMean, // <--- Sekarang tersimpan!
         'conclusion'  => $conclusion,
     ]);
 

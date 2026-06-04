@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
             $table->text('question_text');
-            $table->enum('category', ['stress', 'anxiety', 'depression'])->nullable();
+            // Menggunakan string agar tidak terbatas pada enum tertentu saja
+            $table->string('category')->nullable(); 
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

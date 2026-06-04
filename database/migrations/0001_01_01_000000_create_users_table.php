@@ -14,11 +14,14 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
+            // email dibuat nullable agar siswa yang hanya pakai NISN tetap bisa daftar
+            $table->string('email')->unique()->nullable(); 
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['admin', 'student', 'parent']);
             $table->string('nisn')->nullable();
+            // Penambahan kolom kelas
+            $table->string('kelas')->nullable(); 
             $table->foreignId('parent_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->string('phone')->nullable();
             $table->string('specialization')->nullable();

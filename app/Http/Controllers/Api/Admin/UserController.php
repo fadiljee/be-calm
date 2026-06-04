@@ -26,6 +26,8 @@ class UserController extends Controller
     return $this->successResponse($users, "Daftar $role berhasil dimuat");
 }
 
+
+
     public function store(Request $request)
     {
         $request->validate([

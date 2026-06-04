@@ -18,17 +18,19 @@ class ChildController extends Controller
         return $this->successResponse($children, 'Children list retrieved');
     }
 
-    public function childScores(Request $request, $student_id)
-    {
-        $child = User::where('id', $student_id)
-            ->where('parent_id', $request->user()->id)
-            ->firstOrFail();
-            
-        $scores = ScreeningHistory::where('student_id', $student_id)->latest()->get();
+    // app/Http/Controllers/Api/Parent/ChildController.php
+
+public function childScores(Request $request, $student_id)
+{
+    // Validasi apakah benar ini anak dari orang tua yang login
+    User::where('id', $student_id)
+        ->where('parent_id', $request->user()->id)
+        ->firstOrFail();
         
-        return $this->successResponse([
-            'child' => $child,
-            'scores' => $scores
-        ], 'Child scores retrieved');
-    }
+    // Ambil history-nya saja secara langsung
+    $scores = ScreeningHistory::where('student_id', $student_id)->latest()->get();
+    
+    // Kirim $scores langsung sebagai data utama
+    return $this->successResponse($scores, 'Child scores retrieved');
+}
 }

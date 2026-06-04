@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Student\ActivityController;
 use App\Http\Controllers\Api\Student\JournalController;
 use App\Http\Controllers\Api\Student\ConsultationController as StudentConsultationController;
 use App\Http\Controllers\Api\Student\QuestionController as StudentQuestionController;
+use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\Student\ScreeningController as StudentScreeningController;
 
 use Illuminate\Support\Facades\Route;
@@ -23,14 +24,21 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     // Public Routes
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login-parent', [AuthController::class, 'loginOrangTua']);
 
     // Protected Routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/profile', [AuthController::class, 'profile']);
+          Route::post('/change-password', [AuthController::class, 'changePassword']);
+        Route::get('/messages/{receiverId}', [ChatController::class, 'getMessages']);
+    Route::post('/send-message', [ChatController::class, 'sendMessage']);
+
+    Route::get('/guru-bk', [UserController::class, 'index']);
 
         // Admin Routes
         Route::middleware('role:admin')->prefix('admin')->group(function () {
+            Route::post('/users/import', [UserController::class, 'importStudents']);
             Route::apiResource('users', UserController::class);
             Route::apiResource('questions', AdminQuestionController::class);
             
@@ -50,6 +58,14 @@ Route::prefix('v1')->group(function () {
             
             Route::apiResource('activities', ActivityController::class);
             Route::apiResource('journals', JournalController::class);
+          
+
+           // ── PASTIKAN 5 BARIS INI ADA DI SINI ──
+            Route::get('/journal/check-pin', [JournalController::class, 'checkPin']);
+            Route::post('/journal/setup-pin', [JournalController::class, 'setupPin']);
+            Route::post('/journal/verify-pin', [JournalController::class, 'verifyPin']);
+            Route::post('/journal/forgot-pin', [JournalController::class, 'forgotPin']);
+            Route::post('/journal/verify-otp', [JournalController::class, 'verifyOtp']);
             
             Route::get('/teachers', [StudentConsultationController::class, 'index']);
             Route::post('/consultations', [StudentConsultationController::class, 'store']);
