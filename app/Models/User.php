@@ -45,7 +45,12 @@ class User extends Authenticatable
     // {
     //     return $this->hasMany(ScreeningHistory::class, 'student_id');
     // }
-
+    // Tambahkan ini di dalam class User
+    public function sentMessages()
+    {
+        // Sesuaikan 'Message' dengan nama model tabel chat kamu
+        return $this->hasMany(\App\Models\Message::class, 'sender_id'); 
+    }
     public function dailyActivities()
     {
         return $this->hasMany(DailyActivity::class, 'student_id');

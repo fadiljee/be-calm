@@ -33,6 +33,7 @@ Route::prefix('v1')->group(function () {
           Route::post('/change-password', [AuthController::class, 'changePassword']);
         Route::get('/messages/{receiverId}', [ChatController::class, 'getMessages']);
     Route::post('/send-message', [ChatController::class, 'sendMessage']);
+    Route::get('/messages/unread/count', [ChatController::class, 'getUnreadCount']);
 
     Route::get('/guru-bk', [UserController::class, 'index']);
 

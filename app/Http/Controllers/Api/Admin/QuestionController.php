@@ -18,33 +18,36 @@ class QuestionController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'question_text' => 'required',
-            'category' => 'nullable|in:stress,anxiety,depression',
-            'is_active' => 'boolean',
-        ]);
+{
+    $request->validate([
+        'question_text' => 'required',
+        // Tambahkan kategori baru kamu di dalam fungsi ini
+        'category' => 'nullable|in:stress,anxiety,depression,stres_akademik,sosial_lingkungan',
+        'is_active' => 'boolean',
+    ]);
 
-        $question = Question::create($request->all());
-        return $this->successResponse($question, 'Question created successfully', 201);
-    }
+    $question = Question::create($request->all());
+    return $this->successResponse($question, 'Question created successfully', 201);
+}
+
+public function update(Request $request, Question $question)
+{
+    $request->validate([
+        'question_text' => 'sometimes|required',
+        // Samakan juga di fungsi update agar saat edit tidak error
+        'category' => 'nullable|in:stress,anxiety,depression,stres_akademik,sosial_lingkungan',
+        'is_active' => 'boolean',
+    ]);
+
+    $question->update($request->all());
+    return $this->successResponse($question, 'Question updated successfully');
+}
 
     public function show(Question $question)
     {
         return $this->successResponse($question, 'Question detail retrieved');
     }
 
-    public function update(Request $request, Question $question)
-    {
-        $request->validate([
-            'question_text' => 'sometimes|required',
-            'category' => 'nullable|in:stress,anxiety,depression',
-            'is_active' => 'boolean',
-        ]);
-
-        $question->update($request->all());
-        return $this->successResponse($question, 'Question updated successfully');
-    }
 
     public function destroy(Question $question)
     {

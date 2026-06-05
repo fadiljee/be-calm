@@ -11,39 +11,44 @@ class ScreeningController extends Controller
 {
     use ApiResponse;
 
-   public function submit(Request $request)
-{
-    $request->validate([
-        'answers' => 'required|array',
-        'answers.*.value' => 'required|integer',
-    ]);
+    public function submit(Request $request)
+    {
+        $request->validate([
+            'answers' => 'required|array',
+            'answers.*.value' => 'required|integer',
+        ]);
 
-    $answers = collect($request->answers);
-    $totalScore = $answers->sum('value');
-    $jumlahButir = $answers->count();
-    
-    // 1. Hitung Grand Mean
-    $grandMean = $totalScore / $jumlahButir;
+        $answers = collect($request->answers);
+        
+        // 1. Hitung Total Score (Penjumlahan semua nilai jawaban)
+        $totalScore = $answers->sum('value');
+        
+        // Catatan: Jika ingin tetap menyimpan grand mean untuk data analitik, baris ini bisa dipertahankan.
+        $jumlahButir = $answers->count();
+        $grandMean = $jumlahButir > 0 ? $totalScore / $jumlahButir : 0;
 
-    // 2. Logika Kesimpulan (Interval sesuai rumus kamu)
-    if ($grandMean >= 2.5) {
-        $conclusion = 'Baik';
-    } elseif ($grandMean >= 1.5) {
-        $conclusion = 'Sedang';
-    } else {
-        $conclusion = 'Risiko Tinggi';
+        // 2. Logika Kesimpulan berdasarkan Total Score sesuai foto
+        if ($totalScore >= 91 && $totalScore <= 120) {
+            $conclusion = 'Stres Berat';
+        } elseif ($totalScore >= 61 && $totalScore <= 90) {
+            $conclusion = 'Stres Sedang';
+        } elseif ($totalScore >= 31 && $totalScore <= 60) {
+            $conclusion = 'Stres Ringan';
+        } else {
+            // Meng-cover rentang 1-30 (atau kondisi jika score di bawah itu)
+            $conclusion = 'Normal';
+        }
+
+        // 3. Simpan ke Database
+        $history = ScreeningHistory::create([
+            'student_id'  => $request->user()->id,
+            'total_score' => $totalScore,
+            'grand_mean'  => $grandMean, 
+            'conclusion'  => $conclusion,
+        ]);
+
+        return $this->successResponse($history, 'Screening submitted successfully', 201);
     }
-
-    // 3. Simpan ke Database (Termasuk grand_mean)
-    $history = ScreeningHistory::create([
-        'student_id'  => $request->user()->id,
-        'total_score' => $totalScore,
-        'grand_mean'  => $grandMean, // <--- Sekarang tersimpan!
-        'conclusion'  => $conclusion,
-    ]);
-
-    return $this->successResponse($history, 'Screening submitted successfully', 201);
-}
 
     public function history(Request $request)
     {
