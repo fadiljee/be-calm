@@ -6,26 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            // email dibuat nullable agar siswa yang hanya pakai NISN tetap bisa daftar
-            $table->string('email')->unique()->nullable(); 
+            $table->string('email')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['admin', 'student', 'parent']);
             $table->string('nisn')->nullable();
-            // Penambahan kolom kelas
-            $table->string('kelas')->nullable(); 
+            $table->string('kelas')->nullable();
             $table->foreignId('parent_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->string('phone')->nullable();
             $table->string('specialization')->nullable();
             $table->text('bio')->nullable();
+            $table->string('journal_pin')->nullable();
+            $table->string('otp_code')->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
@@ -46,9 +44,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');

@@ -13,34 +13,51 @@ class ConsultationController extends Controller
 {
     use ApiResponse;
 
+    public function index()
+    {
+        $teachers = User::where('role', 'admin')->get([
+            'id',
+            'name',
+            'email',
+            'phone',
+            'specialization',
+            'bio',
+        ]);
+
+        return $this->successResponse($teachers, 'Daftar Guru BK berhasil dimuat');
+    }
+
     public function store(Request $request)
     {
         $request->validate([
-            'topic' => 'required',
+            'topic'   => 'required',
             'message' => 'required',
         ]);
 
-        // Find an admin (Guru BK) - for simplicity take the first one or a specific one if needed
         $admin = User::where('role', 'admin')->first();
 
         if (!$admin) {
-            return $this->errorResponse('No Admin (Guru BK) available', 404);
+            return $this->errorResponse('Tidak ada Guru BK yang tersedia', 404);
         }
 
         $consultation = Consultation::create([
             'student_id' => $request->user()->id,
-            'admin_id' => $admin->id,
-            'topic' => $request->topic,
-            'status' => 'open',
+            'admin_id'   => $admin->id,
+            'topic'      => $request->topic,
+            'status'     => 'open',
         ]);
 
         ConsultationMessage::create([
             'consultation_id' => $consultation->id,
-            'sender_id' => $request->user()->id,
-            'message' => $request->message,
+            'sender_id'       => $request->user()->id,
+            'message'         => $request->message,
         ]);
 
-        return $this->successResponse($consultation->load('messages'), 'Consultation session created', 201);
+        return $this->successResponse(
+            $consultation->load('messages'),
+            'Sesi konsultasi berhasil dibuat',
+            201
+        );
     }
 
     public function show(Request $request, Consultation $consultation)
@@ -49,23 +66,12 @@ class ConsultationController extends Controller
             return $this->errorResponse('Unauthorized', 403);
         }
 
-        return $this->successResponse($consultation->load('messages'), 'Consultation details retrieved');
+        return $this->successResponse(
+            $consultation->load('messages'),
+            'Detail konsultasi berhasil diambil'
+        );
     }
-// TeacherController.php di Laravel
-        public function index()
-    {
-        // Filter user dengan role 'admin'
-        $teachers = User::where('role', 'admin')->get([
-            'id', 
-            'name', 
-            'email', 
-            'phone', 
-            'specialization', 
-            'bio'
-        ]);
 
-        return $this->successResponse($teachers, 'Daftar Guru BK berhasil dimuat');
-    }
     public function sendMessage(Request $request, Consultation $consultation)
     {
         if ($consultation->student_id !== $request->user()->id) {
@@ -73,7 +79,7 @@ class ConsultationController extends Controller
         }
 
         if ($consultation->status === 'closed') {
-            return $this->errorResponse('Consultation is closed', 400);
+            return $this->errorResponse('Konsultasi sudah ditutup', 400);
         }
 
         $request->validate([
@@ -82,10 +88,10 @@ class ConsultationController extends Controller
 
         $message = ConsultationMessage::create([
             'consultation_id' => $consultation->id,
-            'sender_id' => $request->user()->id,
-            'message' => $request->message,
+            'sender_id'       => $request->user()->id,
+            'message'         => $request->message,
         ]);
 
-        return $this->successResponse($message, 'Message sent', 201);
+        return $this->successResponse($message, 'Pesan terkirim', 201);
     }
 }
