@@ -27,6 +27,7 @@ class User extends Authenticatable
         'journal_pin',
         'otp_code',
         'otp_expires_at',
+        'pin_reset_verified',
     ];
 
     protected $hidden = [
@@ -38,9 +39,10 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'otp_expires_at'    => 'datetime',
-            'password'          => 'hashed',
+            'email_verified_at'   => 'datetime',
+            'otp_expires_at'      => 'datetime',
+            'pin_reset_verified'  => 'boolean',
+            'password'            => 'hashed',
         ];
     }
 

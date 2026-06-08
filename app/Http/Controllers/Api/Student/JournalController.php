@@ -30,10 +30,17 @@ class JournalController extends Controller
         $request->validate(['pin' => 'required|digits:4']);
 
         $user = $request->user();
-        $user->journal_pin = Hash::make($request->pin);
+
+        // Jika user sudah punya PIN, harus melalui alur OTP terlebih dahulu
+        if (!is_null($user->journal_pin) && !$user->pin_reset_verified) {
+            return $this->errorResponse('Verifikasi OTP diperlukan untuk mereset PIN', 403);
+        }
+
+        $user->journal_pin        = Hash::make($request->pin);
+        $user->pin_reset_verified = false; // reset flag setelah digunakan
         $user->save();
 
-        return $this->successResponse(null, 'PIN berhasil dibuat');
+        return $this->successResponse(null, 'PIN berhasil ' . (is_null($user->getOriginal('journal_pin')) ? 'dibuat' : 'direset'));
     }
 
     public function verifyPin(Request $request)
@@ -77,8 +84,9 @@ class JournalController extends Controller
         $user = $request->user();
 
         if ($user->otp_code == $request->otp && Carbon::now()->isBefore($user->otp_expires_at)) {
-            $user->otp_code       = null;
-            $user->otp_expires_at = null;
+            $user->otp_code           = null;
+            $user->otp_expires_at     = null;
+            $user->pin_reset_verified = true; // tandai bahwa OTP sudah diverifikasi
             $user->save();
 
             return $this->successResponse(null, 'OTP Valid, silakan buat PIN baru');
