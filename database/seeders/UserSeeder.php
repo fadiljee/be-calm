@@ -12,11 +12,23 @@ class UserSeeder extends Seeder
     {
         // ── Admin (Guru BK) ──────────────────────────────────────────────────
         User::create([
-            'name'           => 'Riskie Relica, S.Pd',
-            'email'          => 'admin@calmspace.com',
+            'name'           => 'Sonia Latifa, S.Pd',
+            'email'          => 'sonia.latifa@calmspace.com',
             'password'       => Hash::make('password'),
             'role'           => 'admin',
-            'phone'          => '6282234567891',
+            'nisn'           => '199903082025212054',
+            'phone'          => '6285779185925',
+            'specialization' => 'Konseling Akademik & Karier',
+            'bio'            => 'Siap membantu menemukan potensi terbaikmu 🌿',
+        ]);
+
+        User::create([
+            'name'           => 'Riskie Relica, S.Pd',
+            'email'          => 'riskie.relica@calmspace.com',
+            'password'       => Hash::make('password'),
+            'role'           => 'admin',
+            'nisn'           => '199504222024212032',
+            'phone'          => '6281373762996',
             'specialization' => 'Konseling Akademik & Karier',
             'bio'            => 'Siap membantu menemukan potensi terbaikmu 🌿',
         ]);

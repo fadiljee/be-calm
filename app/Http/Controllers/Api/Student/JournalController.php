@@ -15,12 +15,15 @@ class JournalController extends Controller
 {
     use ApiResponse;
 
-    public function checkPin(Request $request)
-    {
-        $hasPin = !is_null($request->user()->journal_pin);
-
-        return $this->successResponse(['has_pin' => $hasPin], 'PIN status retrieved');
-    }
+   public function checkPin(Request $request)
+{
+    $user = $request->user();
+    // Cek log di server apakah $user->journal_pin itu null atau ada isinya
+    \Log::info("PIN User: " . $user->journal_pin); 
+    
+    $hasPin = !is_null($user->journal_pin);
+    return $this->successResponse(['has_pin' => $hasPin], 'PIN status retrieved');
+}
 
     public function setupPin(Request $request)
     {

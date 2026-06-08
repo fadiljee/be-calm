@@ -14,7 +14,11 @@ class ScreeningController extends Controller
     public function index()
     {
         $students = User::where('role', 'student')
-            ->with('screeningHistories')
+            // ── UPDATE EAGER LOADING DI SINI ──
+            // Memanggil relasi answers dan memanggil relasi question di dalam answers
+            ->with(['screeningHistories' => function ($query) {
+                $query->latest(); // Mengurutkan dari yang terbaru
+            }, 'screeningHistories.answers.question']) 
             ->withCount(['sentMessages as unread_count' => function ($query) {
                 $query->where('receiver_id', auth()->id())
                       ->where('is_read', false);
@@ -31,7 +35,9 @@ class ScreeningController extends Controller
                        ->where('role', 'student')
                        ->firstOrFail();
 
+        // ── UPDATE EAGER LOADING ──
         $history = ScreeningHistory::where('student_id', $student_id)
+                                   ->with('answers.question')
                                    ->latest()
                                    ->get();
 
@@ -40,4 +46,10 @@ class ScreeningController extends Controller
             'history' => $history,
         ], 'Student history retrieved');
     }
+
+    public function destroy($id) {
+    $history = ScreeningHistory::findOrFail($id);
+    $history->delete(); // Ini otomatis akan menghapus data di screening_answers jika di database sudah diset ON DELETE CASCADE
+    return response()->json(['message' => 'Deleted']);
+}
 }

@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Student\ConsultationController as StudentConsultati
 use App\Http\Controllers\Api\Student\JournalController;
 use App\Http\Controllers\Api\Student\QuestionController as StudentQuestionController;
 use App\Http\Controllers\Api\Student\ScreeningController as StudentScreeningController;
+use App\Http\Controllers\Api\Admin\ScreeningController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,6 +47,7 @@ Route::prefix('v1')->group(function () {
 
             Route::get('/student-scores',             [AdminScreeningController::class, 'index']);
             Route::get('/student-scores/{student_id}', [AdminScreeningController::class, 'show']);
+            Route::delete('/admin/screening-history/{id}', [ScreeningController::class, 'destroy']);
 
             Route::get('/consultations',                             [AdminConsultationController::class, 'index']);
             Route::post('/consultations/{consultation}/reply',       [AdminConsultationController::class, 'reply']);
