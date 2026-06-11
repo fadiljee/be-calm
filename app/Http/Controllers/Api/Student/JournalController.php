@@ -15,15 +15,15 @@ class JournalController extends Controller
 {
     use ApiResponse;
 
-   public function checkPin(Request $request)
-{
-    $user = $request->user();
-    // Cek log di server apakah $user->journal_pin itu null atau ada isinya
-    \Log::info("PIN User: " . $user->journal_pin); 
-    
-    $hasPin = !is_null($user->journal_pin);
-    return $this->successResponse(['has_pin' => $hasPin], 'PIN status retrieved');
-}
+    public function checkPin(Request $request)
+    {
+        $user = $request->user();
+        // Cek log di server apakah $user->journal_pin itu null atau ada isinya
+        \Log::info("PIN User: " . $user->journal_pin);
+
+        $hasPin = !is_null($user->journal_pin);
+        return $this->successResponse(['has_pin' => $hasPin], 'PIN status retrieved');
+    }
 
     public function setupPin(Request $request)
     {
@@ -36,7 +36,7 @@ class JournalController extends Controller
             return $this->errorResponse('Verifikasi OTP diperlukan untuk mereset PIN', 403);
         }
 
-        $user->journal_pin        = Hash::make($request->pin);
+        $user->journal_pin = Hash::make($request->pin);
         $user->pin_reset_verified = false; // reset flag setelah digunakan
         $user->save();
 
@@ -66,7 +66,7 @@ class JournalController extends Controller
 
         $otp = rand(100000, 999999);
 
-        $user->otp_code       = $otp;
+        $user->otp_code = $otp;
         $user->otp_expires_at = Carbon::now()->addMinutes(15);
         $user->save();
 
@@ -84,8 +84,8 @@ class JournalController extends Controller
         $user = $request->user();
 
         if ($user->otp_code == $request->otp && Carbon::now()->isBefore($user->otp_expires_at)) {
-            $user->otp_code           = null;
-            $user->otp_expires_at     = null;
+            $user->otp_code = null;
+            $user->otp_expires_at = null;
             $user->pin_reset_verified = true; // tandai bahwa OTP sudah diverifikasi
             $user->save();
 
@@ -98,8 +98,8 @@ class JournalController extends Controller
     public function index(Request $request)
     {
         $journals = Journal::where('student_id', $request->user()->id)
-                           ->latest()
-                           ->get();
+            ->latest()
+            ->get();
 
         return $this->successResponse($journals, 'Daftar jurnal berhasil diambil');
     }
@@ -107,18 +107,18 @@ class JournalController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'content'    => 'required|string',
-            'mood'       => 'required|string',
+            'content' => 'required|string',
+            'mood' => 'required|string',
             'mood_label' => 'required|string',
-            'date'       => 'required|string',
+            'date' => 'required|string',
         ]);
 
         $journal = Journal::create([
             'student_id' => $request->user()->id,
-            'content'    => $validated['content'],
-            'mood'       => $validated['mood'],
+            'content' => $validated['content'],
+            'mood' => $validated['mood'],
             'mood_label' => $validated['mood_label'],
-            'date'       => $validated['date'],
+            'date' => $validated['date'],
         ]);
 
         return $this->successResponse($journal, 'Jurnal berhasil disimpan', 201);
@@ -140,10 +140,10 @@ class JournalController extends Controller
         }
 
         $validated = $request->validate([
-            'content'    => 'sometimes|required|string',
-            'mood'       => 'sometimes|required|string',
+            'content' => 'sometimes|required|string',
+            'mood' => 'sometimes|required|string',
             'mood_label' => 'sometimes|required|string',
-            'date'       => 'sometimes|required|string',
+            'date' => 'sometimes|required|string',
         ]);
 
         $journal->update($validated);

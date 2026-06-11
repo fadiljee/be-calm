@@ -17,8 +17,8 @@ class UserController extends Controller
         $role = $request->query('role', 'student');
 
         $users = User::where('role', $role)
-                     ->with(['screeningHistories' => fn ($q) => $q->latest()])
-                     ->get();
+            ->with(['screeningHistories' => fn($q) => $q->latest()])
+            ->get();
 
         return $this->successResponse($users, "Daftar {$role} berhasil dimuat");
     }
@@ -26,20 +26,20 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'      => 'required',
-            'email'     => 'required|email|unique:users',
-            'password'  => 'required|min:6',
-            'role'      => 'required|in:student,parent',
-            'nisn'      => 'nullable|string',
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6',
+            'role' => 'required|in:student,parent',
+            'nisn' => 'nullable|string',
             'parent_id' => 'nullable|exists:users,id',
         ]);
 
         $user = User::create([
-            'name'      => $request->name,
-            'email'     => $request->email,
-            'password'  => Hash::make($request->password),
-            'role'      => $request->role,
-            'nisn'      => $request->nisn,
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+            'nisn' => $request->nisn,
             'parent_id' => $request->parent_id,
         ]);
 
@@ -54,10 +54,10 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $request->validate([
-            'name'      => 'sometimes|required',
-            'email'     => 'sometimes|required|email|unique:users,email,' . $user->id,
-            'role'      => 'sometimes|required|in:student,parent',
-            'nisn'      => 'nullable|string',
+            'name' => 'sometimes|required',
+            'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
+            'role' => 'sometimes|required|in:student,parent',
+            'nisn' => 'nullable|string',
             'parent_id' => 'nullable|exists:users,id',
         ]);
 
