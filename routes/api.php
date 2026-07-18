@@ -47,7 +47,7 @@ Route::prefix('v1')->group(function () {
 
             Route::get('/student-scores',             [AdminScreeningController::class, 'index']);
             Route::get('/student-scores/{student_id}', [AdminScreeningController::class, 'show']);
-            Route::delete('/admin/screening-history/{id}', [ScreeningController::class, 'destroy']);
+            Route::delete('/screening-history/{id}', [ScreeningController::class, 'destroy']);
 
             Route::get('/consultations',                             [AdminConsultationController::class, 'index']);
             Route::post('/consultations/{consultation}/reply',       [AdminConsultationController::class, 'reply']);
@@ -68,6 +68,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/journal/verify-pin',    [JournalController::class, 'verifyPin']);
             Route::post('/journal/forgot-pin',    [JournalController::class, 'forgotPin']);
             Route::post('/journal/verify-otp',    [JournalController::class, 'verifyOtp']);
+            Route::delete('/journal/remove-pin', [JournalController::class, 'removePin']);
 
             Route::get('/teachers',                                    [StudentConsultationController::class, 'index']);
             Route::post('/consultations',                              [StudentConsultationController::class, 'store']);

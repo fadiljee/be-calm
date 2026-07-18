@@ -22,7 +22,7 @@ class QuestionController extends Controller
     $request->validate([
         'question_text' => 'required',
         // Tambahkan kategori baru kamu di dalam fungsi ini
-        'category' => 'nullable|in:stress,anxiety,depression,stres_akademik,sosial_lingkungan',
+        'category' => 'nullable|in:broken_home,kurang_peran_orang_tua,kecemasan_berlebih,lingkungan,stres_akademik,ekonomi',
         'is_active' => 'boolean',
     ]);
 
@@ -35,7 +35,7 @@ public function update(Request $request, Question $question)
     $request->validate([
         'question_text' => 'sometimes|required',
         // Samakan juga di fungsi update agar saat edit tidak error
-        'category' => 'nullable|in:stress,anxiety,depression,stres_akademik,sosial_lingkungan',
+        'category' => 'nullable|in:broken_home,kurang_peran_orang_tua,kecemasan_berlebih,lingkungan,stres_akademik,ekonomi',
         'is_active' => 'boolean',
     ]);
 
