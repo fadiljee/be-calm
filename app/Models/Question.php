@@ -14,4 +14,13 @@ class Question extends Model
         'category',
         'is_active',
     ];
+
+    // Default: setiap soal baru langsung aktif agar muncul di screening siswa
+    protected $attributes = [
+        'is_active' => true,
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 }

@@ -25,22 +25,47 @@ class JournalController extends Controller
         return $this->successResponse(['has_pin' => $hasPin], 'PIN status retrieved');
     }
 
+    public function removePin(Request $request)
+    {
+        $user = $request->user();
+
+        // Kosongkan PIN di database
+        $user->journal_pin = null;
+        $user->save();
+
+        return $this->successResponse(null, 'PIN Jurnal berhasil dihapus');
+    }
+
     public function setupPin(Request $request)
     {
-        $request->validate(['pin' => 'required|digits:4']);
+        // Tambahkan validasi old_pin (opsional/nullable)
+        $request->validate([
+            'pin' => 'required|digits:4',
+            'old_pin' => 'nullable|digits:4'
+        ]);
 
         $user = $request->user();
 
-        // Jika user sudah punya PIN, harus melalui alur OTP terlebih dahulu
-        if (!is_null($user->journal_pin) && !$user->pin_reset_verified) {
-            return $this->errorResponse('Verifikasi OTP diperlukan untuk mereset PIN', 403);
+        // Jika user SUDAH PUNYA PIN
+        if (!is_null($user->journal_pin)) {
+            // Skenario 1: Ubah PIN biasa (Membawa old_pin dari aplikasi)
+            if ($request->filled('old_pin')) {
+                if (!Hash::check($request->old_pin, $user->journal_pin)) {
+                    return $this->errorResponse('PIN lama tidak sesuai', 400);
+                }
+            } 
+            // Skenario 2: Lupa PIN (Tidak bawa old_pin, wajib sudah verifikasi OTP)
+            else if (!$user->pin_reset_verified) {
+                return $this->errorResponse('Verifikasi OTP diperlukan untuk mereset PIN', 403);
+            }
         }
 
-        $user->journal_pin = Hash::make($request->pin);
+        // Simpan PIN baru
+        $user->journal_pin        = Hash::make($request->pin);
         $user->pin_reset_verified = false; // reset flag setelah digunakan
         $user->save();
 
-        return $this->successResponse(null, 'PIN berhasil ' . (is_null($user->getOriginal('journal_pin')) ? 'dibuat' : 'direset'));
+        return $this->successResponse(null, 'PIN berhasil ' . (is_null($user->getOriginal('journal_pin')) ? 'dibuat' : 'diperbarui'));
     }
 
     public function verifyPin(Request $request)

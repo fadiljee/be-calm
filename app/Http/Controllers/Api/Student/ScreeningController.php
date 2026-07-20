@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\ScreeningAnswer;
 use App\Models\ScreeningHistory;
-use App\Models\ScreeningAnswer; // <-- Jangan lupa import Model baru
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 
@@ -14,67 +14,61 @@ class ScreeningController extends Controller
 
     public function submit(Request $request)
     {
-        // ── 1. UPDATE VALIDASI ──
-        // Pastikan Flutter juga mengirimkan 'question_id' untuk setiap jawaban
         $request->validate([
-            'answers' => 'required|array',
-            'answers.*.question_id' => 'required|exists:questions,id',
-            'answers.*.value' => 'required|integer',
+            'answers'               => 'required|array',
+            'answers.*.value'       => 'required|integer',
+            'answers.*.question_id' => 'required|integer',
         ]);
 
         $answers = collect($request->answers);
-        
-        // Hitung Total Score (Penjumlahan semua nilai jawaban)
         $totalScore = $answers->sum('value');
-        
         $jumlahButir = $answers->count();
-        $grandMean = $jumlahButir > 0 ? $totalScore / $jumlahButir : 0;
 
-        // Logika Kesimpulan berdasarkan Total Score
-        if ($totalScore >= 91 && $totalScore <= 120) {
-            $conclusion = 'Stres Berat';
-        } elseif ($totalScore >= 61 && $totalScore <= 90) {
-            $conclusion = 'Stres Sedang';
-        } elseif ($totalScore >= 31 && $totalScore <= 60) {
-            $conclusion = 'Stres Ringan';
-        } else {
+        // 1. Hitung skor maksimal dinamis berdasarkan jumlah soal
+        $skorMaks = $jumlahButir * 4;
+
+        // 2. Hitung persentase (0–100)
+        $percentage = $skorMaks > 0 ? round(($totalScore / $skorMaks) * 100, 2) : 0;
+
+        // 3. Tentukan kategori berdasarkan persentase
+        if ($percentage <= 25) {
             $conclusion = 'Normal';
+        } elseif ($percentage <= 50) {
+            $conclusion = 'Stres Ringan';
+        } elseif ($percentage <= 75) {
+            $conclusion = 'Stres Sedang';
+        } else {
+            $conclusion = 'Stres Berat';
         }
 
-        // Simpan ke Database Induk (History)
+        // 4. Simpan screening history
         $history = ScreeningHistory::create([
             'student_id'  => $request->user()->id,
             'total_score' => $totalScore,
-            'grand_mean'  => $grandMean, 
+            'grand_mean'  => $percentage,
             'conclusion'  => $conclusion,
         ]);
 
-        // ── 2. TAMBAHAN: SIMPAN RINCIAN JAWABAN KE TABEL BARU ──
-        $detailAnswers = [];
+        // 5. Simpan tiap jawaban ke tabel screening_answers
         foreach ($request->answers as $ans) {
-            $detailAnswers[] = [
+            ScreeningAnswer::create([
                 'screening_history_id' => $history->id,
                 'question_id'          => $ans['question_id'],
-                'score'                => $ans['value'], // Mengambil dari 'value'
-                'created_at'           => now(),
-                'updated_at'           => now(),
-            ];
+                'score'                => $ans['value'],
+            ]);
         }
-        
-        // Gunakan insert agar proses penyimpanan ke database lebih cepat (sekali query)
-        ScreeningAnswer::insert($detailAnswers);
 
-        return $this->successResponse($history->load('answers.question'), 'Screening submitted successfully', 201);
+        // Sertakan percentage di response agar Flutter bisa langsung pakai
+        $responseData = $history->toArray();
+        $responseData['percentage'] = $percentage;
+        $responseData['max_score']  = $skorMaks;
+
+        return $this->successResponse($responseData, 'Screening submitted successfully', 201);
     }
 
     public function history(Request $request)
     {
-        // Tambahkan with('answers.question') jika siswa juga butuh melihat rinciannya
-        $history = ScreeningHistory::where('student_id', $request->user()->id)
-                                   ->with('answers.question')
-                                   ->latest()
-                                   ->get();
-                                   
+        $history = ScreeningHistory::where('student_id', $request->user()->id)->latest()->get();
         return $this->successResponse($history, 'Screening history retrieved');
     }
 }

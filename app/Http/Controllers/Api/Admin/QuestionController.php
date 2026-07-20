@@ -18,36 +18,36 @@ class QuestionController extends Controller
     }
 
     public function store(Request $request)
-{
-    $request->validate([
-        'question_text' => 'required',
-        // Tambahkan kategori baru kamu di dalam fungsi ini
-        'category' => 'nullable|in:stress,anxiety,depression,stres_akademik,sosial_lingkungan',
-        'is_active' => 'boolean',
-    ]);
+    {
+        $validated = $request->validate([
+            'question_text' => 'required',
+            'category' => 'nullable|in:broken_home,kurang_peran_orang_tua,kecemasan_berlebih,lingkungan,stres_akademik,ekonomi',
+            'is_active' => 'boolean',
+        ]);
 
-    $question = Question::create($request->all());
-    return $this->successResponse($question, 'Question created successfully', 201);
-}
+        // Default is_active = true agar soal langsung muncul di screening siswa
+        $validated['is_active'] = $validated['is_active'] ?? true;
 
-public function update(Request $request, Question $question)
-{
-    $request->validate([
-        'question_text' => 'sometimes|required',
-        // Samakan juga di fungsi update agar saat edit tidak error
-        'category' => 'nullable|in:stress,anxiety,depression,stres_akademik,sosial_lingkungan',
-        'is_active' => 'boolean',
-    ]);
-
-    $question->update($request->all());
-    return $this->successResponse($question, 'Question updated successfully');
-}
+        $question = Question::create($validated);
+        return $this->successResponse($question, 'Question created successfully', 201);
+    }
 
     public function show(Question $question)
     {
         return $this->successResponse($question, 'Question detail retrieved');
     }
 
+    public function update(Request $request, Question $question)
+    {
+        $request->validate([
+            'question_text' => 'sometimes|required',
+            'category' => 'nullable|in:broken_home,kurang_peran_orang_tua,kecemasan_berlebih,lingkungan,stres_akademik,ekonomi',
+            'is_active' => 'boolean',
+        ]);
+
+        $question->update($request->all());
+        return $this->successResponse($question, 'Question updated successfully');
+    }
 
     public function destroy(Question $question)
     {

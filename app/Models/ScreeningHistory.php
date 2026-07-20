@@ -15,8 +15,10 @@ class ScreeningHistory extends Model
     {
         return $this->belongsTo(User::class, 'student_id');
     }
+
     public function answers()
     {
-        return $this->hasMany(ScreeningAnswer::class);
+        return $this->hasMany(ScreeningAnswer::class, 'screening_history_id');
     }
 }
+
